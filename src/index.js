@@ -22,6 +22,18 @@ function serverError(res, err) {
 }
 
 app.use(
+  basicAuth({
+    users: { [ADMIN_USER]: ADMIN_PASSWORD },
+    challenge: true,
+    realm: 'DMS Vault',
+  })
+);
+
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
+
+app.use(
+  '/api/',
   rateLimit({
     windowMs: 60 * 1000,
     max: 20,
@@ -30,17 +42,6 @@ app.use(
     message: { error: 'Zu viele Anfragen, bitte warte eine Minute.' },
   })
 );
-
-app.use(
-  basicAuth({
-    users: { [ADMIN_USER]: ADMIN_PASSWORD },
-    challenge: true,
-    realm: 'DMS Admin',
-  })
-);
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/api/meta', (req, res) => {
   res.json({ container: process.env.DMS_CONTAINER || 'docker-mailserver' });
@@ -128,6 +129,6 @@ app.put('/api/accounts/:email/password', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`DMS WebUI läuft auf Port ${PORT}`);
+  console.log(`DMS Vault läuft auf Port ${PORT}`);
   console.log(`Container: ${process.env.DMS_CONTAINER || 'docker-mailserver'}`);
 });

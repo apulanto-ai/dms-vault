@@ -1,7 +1,7 @@
 services:
-  dms-webui:
+  dms-vault:
     build: .
-    container_name: dms-webui
+    container_name: dms-vault
     ports:
       - "8181:8080"
     volumes:

@@ -1,4 +1,4 @@
-# DMS WebUI
+# DMS Vault
 
 A simple web interface for managing email accounts in [Docker Mailserver](https://github.com/docker-mailserver/docker-mailserver).
 
@@ -57,11 +57,11 @@ The web interface is available at `http://<your-host>:8181`.
 
 ## Unraid
 
-1. Copy the project folder to `/mnt/user/appdata/dms-webui/`
+1. Copy the project folder to `/mnt/user/appdata/dms-vault/`
 2. Edit `docker-compose.yml` and set `DMS_CONTAINER`, `ADMIN_USER`, `ADMIN_PASSWORD`
 3. Install the **Compose Manager** plugin (via Community Applications) and deploy, **or** run manually via Unraid terminal:
    ```bash
-   cd /mnt/user/appdata/dms-webui
+   cd /mnt/user/appdata/dms-vault
    docker compose up -d --build
    ```
 4. Open `http://<unraid-ip>:8181` in your browser
@@ -83,6 +83,10 @@ The web interface is available at `http://<your-host>:8181`.
 - It is recommended to run this on a private network only and not expose it to the internet.
 
 ## Changelog
+
+### v0.6.1
+- Rename: project is now called **DMS Vault** (repo, container, package, docs)
+- Fix: rate limiting now applies to `/api/` routes only — static files no longer consume rate limit quota
 
 ### v0.6.0
 - Full backup download: streams `/var/mail` + `/tmp/docker-mailserver` as `dms-backup-YYYY-MM-DD.tar.gz`
