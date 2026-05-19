@@ -32,8 +32,8 @@ A simple web interface for managing email accounts in [Docker Mailserver](https:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/apulanto-ai/dms-webui.git
-cd dms-webui
+git clone https://github.com/apulanto-ai/dms-vault.git
+cd dms-vault
 ```
 
 ### 2. Configure `docker-compose.yml`
