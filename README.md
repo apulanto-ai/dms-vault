@@ -44,7 +44,7 @@ cd dms-vault
 environment:
   DMS_CONTAINER: Docker-Mailserver   # exact name of your DMS container
   ADMIN_USER: admin                  # web UI login username
-  ADMIN_PASSWORD: changeme           # web UI login password
+  ADMIN_PASSWORD: admin           # web UI login password
 ```
 
 > The container name is **case-sensitive**. Check yours with `docker ps`.
