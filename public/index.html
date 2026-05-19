@@ -1,23 +1,58 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Docker Mailserver Admin</title>
+  <script>
+    (function () {
+      const t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <script defer src="/alpine.js"></script>
   <style>
+    :root {
+      --bg:           #0f172a;
+      --surface:      #1e293b;
+      --surface-hover:#263248;
+      --border:       #334155;
+      --text:         #e2e8f0;
+      --text-bright:  #f1f5f9;
+      --text-muted:   #94a3b8;
+      --text-dim:     #64748b;
+      --text-faint:   #475569;
+      --input-bg:     #0f172a;
+      --accent:       #3b82f6;
+    }
+
+    [data-theme="light"] {
+      --bg:           #f1f5f9;
+      --surface:      #ffffff;
+      --surface-hover:#f0f4f8;
+      --border:       #e2e8f0;
+      --text:         #334155;
+      --text-bright:  #0f172a;
+      --text-muted:   #64748b;
+      --text-dim:     #94a3b8;
+      --text-faint:   #94a3b8;
+      --input-bg:     #f8fafc;
+      --accent:       #2563eb;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
     }
 
     header {
-      background: #1e293b;
-      border-bottom: 1px solid #334155;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
@@ -27,7 +62,7 @@
     header h1 {
       font-size: 1.25rem;
       font-weight: 600;
-      color: #f1f5f9;
+      color: var(--text-bright);
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -50,7 +85,7 @@
 
     .toolbar h2 {
       font-size: 0.875rem;
-      color: #94a3b8;
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -71,13 +106,13 @@
     .btn:hover { opacity: 0.85; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary { background: var(--accent); color: #fff; }
     .btn-danger  { background: #ef4444; color: #fff; }
-    .btn-ghost   { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+    .btn-ghost   { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
 
     .card {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 0.75rem;
       overflow: hidden;
     }
@@ -87,29 +122,27 @@
       border-collapse: collapse;
     }
 
-    thead tr {
-      background: #0f172a;
-    }
+    thead tr { background: var(--bg); }
 
     th {
       padding: 0.75rem 1rem;
       text-align: left;
       font-size: 0.75rem;
       font-weight: 600;
-      color: #64748b;
+      color: var(--text-dim);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     td {
       padding: 0.875rem 1rem;
-      border-top: 1px solid #1e293b;
+      border-top: 1px solid var(--surface);
       font-size: 0.9rem;
     }
 
-    tbody tr { background: #1e293b; }
-    tbody tr:hover { background: #263248; }
-    tbody tr:not(:last-child) td { border-bottom: 1px solid #334155; }
+    tbody tr { background: var(--surface); }
+    tbody tr:hover { background: var(--surface-hover); }
+    tbody tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
 
     .email-cell {
       display: flex;
@@ -140,12 +173,11 @@
     .empty-state {
       text-align: center;
       padding: 3rem 1rem;
-      color: #475569;
+      color: var(--text-faint);
     }
 
     .empty-state p { margin-top: 0.5rem; font-size: 0.875rem; }
 
-    /* Modal */
     .modal-bg {
       position: fixed;
       inset: 0;
@@ -158,8 +190,8 @@
     }
 
     .modal {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 0.75rem;
       padding: 1.5rem;
       width: 100%;
@@ -170,7 +202,7 @@
       font-size: 1rem;
       font-weight: 600;
       margin-bottom: 1.25rem;
-      color: #f1f5f9;
+      color: var(--text-bright);
     }
 
     .form-group { margin-bottom: 1rem; }
@@ -178,7 +210,7 @@
     label {
       display: block;
       font-size: 0.8rem;
-      color: #94a3b8;
+      color: var(--text-muted);
       margin-bottom: 0.35rem;
     }
 
@@ -186,17 +218,17 @@
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
       border-radius: 0.5rem;
       padding: 0.6rem 0.75rem;
-      color: #f1f5f9;
+      color: var(--text-bright);
       font-size: 0.9rem;
       outline: none;
       transition: border-color 0.15s;
     }
 
-    input:focus { border-color: #3b82f6; }
+    input:focus { border-color: var(--accent); }
 
     .modal-actions {
       display: flex;
@@ -205,7 +237,6 @@
       margin-top: 1.5rem;
     }
 
-    /* Toast */
     .toast-container {
       position: fixed;
       bottom: 1.5rem;
@@ -251,7 +282,7 @@
   <header>
     <h1><span class="icon">✉</span> Docker Mailserver Admin</h1>
     <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.8rem;">
-      <span style="color:#475569;" x-text="'Container: ' + container"></span>
+      <span style="color:var(--text-faint);" x-text="'Container: ' + container"></span>
       <template x-if="containerStatus">
         <span style="display:flex;align-items:center;gap:0.35rem;">
           <span :style="'width:0.55rem;height:0.55rem;border-radius:50%;background:' + (containerStatus.running ? '#22c55e' : '#ef4444')"></span>
@@ -259,6 +290,10 @@
                 x-text="containerStatus.running ? 'Läuft seit ' + uptime() : 'Gestoppt'"></span>
         </span>
       </template>
+      <button class="btn btn-ghost" @click="toggleTheme()"
+              style="padding:0.35rem 0.6rem;font-size:0.85rem;"
+              :title="theme === 'dark' ? 'Helles Design' : 'Dunkles Design'"
+              x-text="theme === 'dark' ? '☀' : '☾'"></button>
     </div>
   </header>
 
@@ -288,7 +323,7 @@
           <thead>
             <tr>
               <th>E-Mail-Adresse</th>
-              <th>Quota</th>
+              <th>Speicher</th>
               <th style="text-align:right">Aktionen</th>
             </tr>
           </thead>
@@ -301,17 +336,18 @@
                     <span x-text="account.email"></span>
                   </div>
                 </td>
-                <td style="font-size:0.8rem;color:#94a3b8;">
+                <td style="font-size:0.8rem;color:var(--text-muted);">
                   <template x-if="account.limit === '~'">
                     <span>
-                      <span x-text="account.diskLabel ?? '—'" :style="account.diskLabel ? 'color:#cbd5e1' : 'color:#475569'"></span>
-                      <span style="color:#475569;margin-left:0.35rem;">/ kein Limit</span>
+                      <span x-text="account.diskLabel ?? '—'"
+                            :style="account.diskLabel ? 'color:var(--text)' : 'color:var(--text-faint)'"></span>
+                      <span style="color:var(--text-faint);margin-left:0.35rem;">/ kein Limit</span>
                     </span>
                   </template>
                   <template x-if="account.limit !== '~'">
                     <div>
                       <div x-text="account.used + ' / ' + account.limit + ' MB (' + account.pct + '%)'"></div>
-                      <div style="margin-top:0.25rem;height:4px;background:#334155;border-radius:2px;overflow:hidden;">
+                      <div style="margin-top:0.25rem;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
                         <div :style="'height:100%;border-radius:2px;background:' + (account.pct > 85 ? '#ef4444' : account.pct > 60 ? '#f59e0b' : '#3b82f6') + ';width:' + account.pct + '%'"></div>
                       </div>
                     </div>
@@ -329,6 +365,11 @@
         </table>
       </template>
     </div>
+
+    <template x-if="!loading && totalDisk()">
+      <div style="margin-top:0.6rem;font-size:0.78rem;color:var(--text-faint);text-align:right;"
+           x-text="totalDisk()"></div>
+    </template>
   </div>
 
   <!-- Add Account Modal -->
@@ -357,7 +398,7 @@
   <div class="modal-bg" x-show="modal === 'password'" x-cloak @click.self="modal = null">
     <div class="modal">
       <h3>Passwort ändern</h3>
-      <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:1rem;" x-text="form.email"></p>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;" x-text="form.email"></p>
       <div class="form-group">
         <label>Neues Passwort</label>
         <input type="password" x-model="form.password" placeholder="Mindestens 6 Zeichen" @keyup.enter="submitPassword()" />
@@ -376,8 +417,8 @@
   <div class="modal-bg" x-show="modal === 'delete'" x-cloak @click.self="modal = null">
     <div class="modal">
       <h3>Konto löschen?</h3>
-      <p style="font-size:0.875rem;color:#94a3b8;margin-bottom:1.5rem;">
-        Das Konto <strong x-text="form.email" style="color:#f1f5f9"></strong> wird unwiderruflich gelöscht.
+      <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1.5rem;">
+        Das Konto <strong x-text="form.email" style="color:var(--text-bright)"></strong> wird unwiderruflich gelöscht.
       </p>
       <div class="modal-actions">
         <button class="btn btn-ghost" @click="modal = null">Abbrechen</button>
@@ -405,6 +446,7 @@
         modal: null,
         container: '',
         containerStatus: null,
+        theme: localStorage.getItem('theme') || 'dark',
         form: { email: '', password: '' },
         toasts: [],
 
@@ -425,6 +467,23 @@
           } finally {
             this.loading = false;
           }
+        },
+
+        toggleTheme() {
+          this.theme = this.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', this.theme);
+          localStorage.setItem('theme', this.theme);
+        },
+
+        totalDisk() {
+          const withDisk = this.accounts.filter(a => a.diskKb !== null && a.diskKb !== undefined);
+          if (withDisk.length === 0) return '';
+          const totalKb = withDisk.reduce((sum, a) => sum + a.diskKb, 0);
+          let label;
+          if (totalKb >= 1024 * 1024) label = (totalKb / (1024 * 1024)).toFixed(1) + ' GB';
+          else if (totalKb >= 1024) label = (totalKb / 1024).toFixed(1) + ' MB';
+          else label = totalKb + ' KB';
+          return label + ' gesamt';
         },
 
         openAdd() {

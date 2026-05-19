@@ -81,8 +81,8 @@ async function listAccounts() {
       const diskKb = diskSizes[email] ?? null;
       const diskLabel = diskKb !== null ? formatKb(diskKb) : null;
 
-      if (m) return { email, used: m[2], limit: m[3], pct: parseInt(m[4], 10), diskLabel };
-      return { email, used: '0', limit: '~', pct: 0, diskLabel };
+      if (m) return { email, used: m[2], limit: m[3], pct: parseInt(m[4], 10), diskKb, diskLabel };
+      return { email, used: '0', limit: '~', pct: 0, diskKb, diskLabel };
     })
     .filter(Boolean);
 }

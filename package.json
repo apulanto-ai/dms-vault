@@ -1,6 +1,6 @@
 {
   "name": "dms-webui",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Web GUI for Docker Mailserver",
   "main": "src/index.js",
   "scripts": {

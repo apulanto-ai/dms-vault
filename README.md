@@ -8,11 +8,13 @@ A simple web interface for managing email accounts in [Docker Mailserver](https:
 
 ## Features
 
-- List all email accounts with quota usage
+- List all email accounts with disk usage per mailbox
 - Create new accounts
 - Change passwords
 - Delete accounts
+- Total storage summary across all mailboxes
 - Container status display (running state + uptime)
+- Dark/Light mode toggle (saved in browser)
 - Protected by HTTP Basic Auth
 
 ## Requirements
@@ -77,6 +79,11 @@ The web interface is available at `http://<your-host>:8181`.
 - It is recommended to run this on a private network only and not expose it to the internet.
 
 ## Changelog
+
+### v0.5.0
+- Dark/Light mode toggle with localStorage persistence
+- Total storage summary below account table
+- Actual mailbox disk usage shown via `du` even without quota configured
 
 ### v0.4.0
 - Quota display per account (usage / limit with progress bar)
