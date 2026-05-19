@@ -311,6 +311,8 @@
         <option value="60">1 min</option>
         <option value="300">5 min</option>
       </select>
+      <button class="btn btn-ghost" @click="load()" :disabled="loading"
+              style="padding:0.35rem 0.6rem;font-size:1rem;" title="Jetzt aktualisieren">↻</button>
       <button class="btn btn-ghost" @click="toggleTheme()"
               style="padding:0.35rem 0.6rem;font-size:0.85rem;"
               :title="theme === 'dark' ? 'Helles Design' : 'Dunkles Design'"
@@ -468,7 +470,7 @@
         container: '',
         containerStatus: null,
         theme: localStorage.getItem('theme') || 'dark',
-        refreshInterval: parseInt(localStorage.getItem('refreshInterval') || '0', 10),
+        refreshInterval: parseInt(localStorage.getItem('refreshInterval') || '60', 10),
         _refreshTimer: null,
         form: { email: '', password: '' },
         toasts: [],

@@ -82,6 +82,10 @@ The web interface is available at `http://<your-host>:8181`.
 
 ## Changelog
 
+### v0.5.1
+- Manual refresh button (↻) next to the auto-refresh selector
+- Auto-refresh defaults to 1 minute on first use
+
 ### v0.5.0
 - Dark/Light mode toggle with localStorage persistence
 - Total storage summary below account table
