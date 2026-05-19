@@ -4,6 +4,8 @@ services:
     container_name: dms-webui
     ports:
       - "8181:8080"
+    group_add:
+      - "999"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
