@@ -1,15 +1,16 @@
 FROM node:20-alpine
 
-# Docker socket GID (default 999 — check yours with: stat -c '%g' /var/run/docker.sock)
-ARG DOCKER_GID=999
-RUN addgroup -g ${DOCKER_GID} -S docker 2>/dev/null || true \
- && adduser node docker 2>/dev/null || true
+# su-exec: lightweight privilege-drop tool (standard in Alpine)
+RUN apk add --no-cache su-exec
 
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 COPY src ./src
 COPY public ./public
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 8080
-USER node
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "src/index.js"]
