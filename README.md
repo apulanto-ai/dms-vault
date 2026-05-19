@@ -84,6 +84,9 @@ The web interface is available at `http://<your-host>:8181`.
 
 ## Changelog
 
+### v0.6.2
+- Fix: page title and navbar header renamed to DMS Vault
+
 ### v0.6.1
 - Rename: project is now called **DMS Vault** (repo, container, package, docs)
 - Fix: rate limiting now applies to `/api/` routes only — static files no longer consume rate limit quota

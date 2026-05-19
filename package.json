@@ -1,6 +1,6 @@
 {
   "name": "dms-vault",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Web GUI for Docker Mailserver",
   "main": "src/index.js",
   "scripts": {
