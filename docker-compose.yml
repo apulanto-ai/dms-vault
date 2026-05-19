@@ -1,0 +1,14 @@
+services:
+  dms-webui:
+    build: .
+    container_name: dms-webui
+    ports:
+      - "8181:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      DMS_CONTAINER: Docker-Mailserver
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: admin
+    restart: unless-stopped
+    network_mode: bridge

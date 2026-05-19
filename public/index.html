@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker Mailserver Admin</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    header h1 span.icon { font-size: 1.4rem; }
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .toolbar h2 {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-danger  { background: #ef4444; color: #fff; }
+    .btn-ghost   { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: #0f172a;
+    }
+
+    th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 0.875rem 1rem;
+      border-top: 1px solid #1e293b;
+      font-size: 0.9rem;
+    }
+
+    tbody tr { background: #1e293b; }
+    tbody tr:hover { background: #263248; }
+    tbody tr:not(:last-child) td { border-bottom: 1px solid #334155; }
+
+    .email-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #475569;
+    }
+
+    .empty-state p { margin-top: 0.5rem; font-size: 0.875rem; }
+
+    /* Modal */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1rem;
+    }
+
+    .modal {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .modal h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      color: #f1f5f9;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      color: #f1f5f9;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus { border-color: #3b82f6; }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      padding: 0.75rem 1.1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      max-width: 320px;
+      animation: slideIn 0.2s ease;
+    }
+
+    .toast-success { background: #166534; color: #bbf7d0; border: 1px solid #15803d; }
+    .toast-error   { background: #7f1d1d; color: #fecaca; border: 1px solid #991b1b; }
+
+    @keyframes slideIn {
+      from { transform: translateX(1rem); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body x-data="app()" x-init="load()">
+
+  <header>
+    <h1><span class="icon">✉</span> Docker Mailserver Admin</h1>
+    <span style="font-size:0.8rem;color:#475569;" x-text="'Container: ' + container"></span>
+  </header>
+
+  <div class="container">
+    <div class="toolbar">
+      <h2 x-text="accounts.length + ' Konto' + (accounts.length !== 1 ? 'en' : '')"></h2>
+      <button class="btn btn-primary" @click="openAdd()">+ Konto hinzufügen</button>
+    </div>
+
+    <div class="card">
+      <template x-if="loading">
+        <div class="empty-state">
+          <div class="spinner" style="width:2rem;height:2rem;margin:0 auto;"></div>
+          <p>Lade Konten…</p>
+        </div>
+      </template>
+
+      <template x-if="!loading && accounts.length === 0">
+        <div class="empty-state">
+          <div style="font-size:2.5rem">📭</div>
+          <p>Noch keine E-Mail-Konten vorhanden.</p>
+        </div>
+      </template>
+
+      <template x-if="!loading && accounts.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>E-Mail-Adresse</th>
+              <th style="text-align:right">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="email in accounts" :key="email">
+              <tr>
+                <td>
+                  <div class="email-cell">
+                    <div class="avatar" x-text="email[0].toUpperCase()"></div>
+                    <span x-text="email"></span>
+                  </div>
+                </td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-ghost" @click="openPassword(email)">🔑 Passwort</button>
+                    <button class="btn btn-danger" @click="confirmDelete(email)">🗑</button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </template>
+    </div>
+  </div>
+
+  <!-- Add Account Modal -->
+  <div class="modal-bg" x-show="modal === 'add'" x-cloak @click.self="modal = null">
+    <div class="modal">
+      <h3>Neues Konto erstellen</h3>
+      <div class="form-group">
+        <label>E-Mail-Adresse</label>
+        <input type="email" x-model="form.email" placeholder="user@example.com" @keyup.enter="submitAdd()" />
+      </div>
+      <div class="form-group">
+        <label>Passwort</label>
+        <input type="password" x-model="form.password" placeholder="Mindestens 6 Zeichen" @keyup.enter="submitAdd()" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" @click="modal = null">Abbrechen</button>
+        <button class="btn btn-primary" @click="submitAdd()" :disabled="saving">
+          <span x-show="saving" class="spinner"></span>
+          <span x-text="saving ? '' : 'Erstellen'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-bg" x-show="modal === 'password'" x-cloak @click.self="modal = null">
+    <div class="modal">
+      <h3>Passwort ändern</h3>
+      <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:1rem;" x-text="form.email"></p>
+      <div class="form-group">
+        <label>Neues Passwort</label>
+        <input type="password" x-model="form.password" placeholder="Mindestens 6 Zeichen" @keyup.enter="submitPassword()" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" @click="modal = null">Abbrechen</button>
+        <button class="btn btn-primary" @click="submitPassword()" :disabled="saving">
+          <span x-show="saving" class="spinner"></span>
+          <span x-text="saving ? '' : 'Speichern'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-bg" x-show="modal === 'delete'" x-cloak @click.self="modal = null">
+    <div class="modal">
+      <h3>Konto löschen?</h3>
+      <p style="font-size:0.875rem;color:#94a3b8;margin-bottom:1.5rem;">
+        Das Konto <strong x-text="form.email" style="color:#f1f5f9"></strong> wird unwiderruflich gelöscht.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" @click="modal = null">Abbrechen</button>
+        <button class="btn btn-danger" @click="submitDelete()" :disabled="saving">
+          <span x-show="saving" class="spinner"></span>
+          <span x-text="saving ? '' : 'Löschen'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div class="toast-container">
+    <template x-for="(t, i) in toasts" :key="i">
+      <div class="toast" :class="t.type === 'error' ? 'toast-error' : 'toast-success'" x-text="t.msg"></div>
+    </template>
+  </div>
+
+  <script>
+    function app() {
+      return {
+        accounts: [],
+        loading: true,
+        saving: false,
+        modal: null,
+        container: '',
+        form: { email: '', password: '' },
+        toasts: [],
+
+        async load() {
+          this.loading = true;
+          try {
+            const r = await fetch('/api/accounts');
+            if (!r.ok) throw new Error((await r.json()).error);
+            this.accounts = await r.json();
+            const meta = await fetch('/api/meta').catch(() => null);
+            if (meta && meta.ok) this.container = (await meta.json()).container;
+          } catch (e) {
+            this.toast('error', 'Fehler: ' + e.message);
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        openAdd() {
+          this.form = { email: '', password: '' };
+          this.modal = 'add';
+        },
+
+        openPassword(email) {
+          this.form = { email, password: '' };
+          this.modal = 'password';
+        },
+
+        confirmDelete(email) {
+          this.form = { email, password: '' };
+          this.modal = 'delete';
+        },
+
+        async submitAdd() {
+          this.saving = true;
+          try {
+            const r = await fetch('/api/accounts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.form),
+            });
+            const data = await r.json();
+            if (!r.ok) throw new Error(data.error);
+            this.modal = null;
+            this.toast('success', `${this.form.email} erstellt`);
+            await this.load();
+          } catch (e) {
+            this.toast('error', e.message);
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        async submitPassword() {
+          this.saving = true;
+          try {
+            const r = await fetch(`/api/accounts/${encodeURIComponent(this.form.email)}/password`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: this.form.password }),
+            });
+            const data = await r.json();
+            if (!r.ok) throw new Error(data.error);
+            this.modal = null;
+            this.toast('success', 'Passwort geändert');
+          } catch (e) {
+            this.toast('error', e.message);
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        async submitDelete() {
+          this.saving = true;
+          try {
+            const r = await fetch(`/api/accounts/${encodeURIComponent(this.form.email)}`, {
+              method: 'DELETE',
+            });
+            const data = await r.json();
+            if (!r.ok) throw new Error(data.error);
+            this.modal = null;
+            this.toast('success', `${this.form.email} gelöscht`);
+            await this.load();
+          } catch (e) {
+            this.toast('error', e.message);
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        toast(type, msg) {
+          this.toasts.push({ type, msg });
+          setTimeout(() => this.toasts.shift(), 3500);
+        },
+      };
+    }
+  </script>
+</body>
+</html>

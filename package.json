@@ -1,0 +1,15 @@
+{
+  "name": "dms-webui",
+  "version": "0.1.0",
+  "description": "Web GUI for Docker Mailserver",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "dockerode": "^4.0.2",
+    "express": "^4.18.2",
+    "express-basic-auth": "^1.2.1"
+  }
+}
