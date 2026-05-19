@@ -6,6 +6,8 @@ A simple web interface for managing email accounts in [Docker Mailserver](https:
 
 ![DMS Vault Screenshot](docs/screenshot.png)
 
+> Built because managing Docker Mailserver accounts via CLI got old fast — a simple web UI for homelab use.
+
 > **Disclaimer:** This project was built with a Vibe Coding approach — iterative, AI-assisted development without formal auditing or test coverage. It is intended for **personal/homelab use only** and is **not suitable for public-facing or production deployments**. Use at your own risk.
 
 ## Features
