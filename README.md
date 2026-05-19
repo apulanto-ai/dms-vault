@@ -74,7 +74,7 @@ The web interface is available at `http://<your-host>:8181`.
 |---|---|---|
 | `DMS_CONTAINER` | `docker-mailserver` | Name of the DMS container |
 | `ADMIN_USER` | `admin` | Web UI username |
-| `ADMIN_PASSWORD` | `changeme` | Web UI password |
+| `ADMIN_PASSWORD` | `admin` | Web UI password |
 | `PORT` | `8080` | Internal container port |
 
 ## Security
