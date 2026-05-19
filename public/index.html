@@ -323,7 +323,13 @@
   <div class="container">
     <div class="toolbar">
       <h2 x-text="accounts.length + ' Konto' + (accounts.length !== 1 ? 'en' : '')"></h2>
-      <button class="btn btn-primary" @click="openAdd()">+ Konto hinzufügen</button>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn btn-ghost" @click="downloadBackup()" :disabled="backingUp">
+          <span x-show="backingUp" class="spinner"></span>
+          <span x-text="backingUp ? '' : '↓ Backup'"></span>
+        </button>
+        <button class="btn btn-primary" @click="openAdd()">+ Konto hinzufügen</button>
+      </div>
     </div>
 
     <div class="card">
@@ -469,6 +475,7 @@
         modal: null,
         container: '',
         containerStatus: null,
+        backingUp: false,
         theme: localStorage.getItem('theme') || 'dark',
         refreshInterval: parseInt(localStorage.getItem('refreshInterval') || '60', 10),
         _refreshTimer: null,
@@ -509,6 +516,26 @@
             this.toast('error', 'Fehler: ' + e.message);
           } finally {
             this.loading = false;
+          }
+        },
+
+        async downloadBackup() {
+          this.backingUp = true;
+          try {
+            const r = await fetch('/api/backup');
+            if (!r.ok) throw new Error('Backup fehlgeschlagen');
+            const blob = await r.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dms-backup-${new Date().toISOString().slice(0, 10)}.tar.gz`;
+            a.click();
+            URL.revokeObjectURL(url);
+            this.toast('success', 'Backup heruntergeladen');
+          } catch (e) {
+            this.toast('error', e.message);
+          } finally {
+            this.backingUp = false;
           }
         },
 

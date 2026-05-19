@@ -54,6 +54,22 @@ app.get('/api/status', async (req, res) => {
   }
 });
 
+app.get('/api/backup', async (req, res) => {
+  try {
+    const date = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/gzip');
+    res.setHeader('Content-Disposition', `attachment; filename="dms-backup-${date}.tar.gz"`);
+    const stream = await dms.getBackupStream();
+    stream.pipe(res);
+    stream.on('error', (err) => {
+      console.error('[backup error]', err.message);
+      if (!res.headersSent) res.status(500).end();
+    });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
 app.get('/api/accounts', async (req, res) => {
   try {
     res.json(await dms.listAccounts());

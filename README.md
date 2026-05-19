@@ -15,6 +15,7 @@ A simple web interface for managing email accounts in [Docker Mailserver](https:
 - Change passwords
 - Delete accounts
 - Total storage summary across all mailboxes
+- One-click full backup download (mails + config as `.tar.gz`)
 - Container status display (running state + uptime)
 - Dark/Light mode toggle (saved in browser)
 - Protected by HTTP Basic Auth
@@ -81,6 +82,10 @@ The web interface is available at `http://<your-host>:8181`.
 - It is recommended to run this on a private network only and not expose it to the internet.
 
 ## Changelog
+
+### v0.6.0
+- Full backup download: streams `/var/mail` + `/tmp/docker-mailserver` as `dms-backup-YYYY-MM-DD.tar.gz`
+- Backup button in toolbar with loading indicator
 
 ### v0.5.1
 - Manual refresh button (↻) next to the auto-refresh selector

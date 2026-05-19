@@ -1,4 +1,5 @@
 const Docker = require('dockerode');
+const { PassThrough } = require('stream');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 const CONTAINER_NAME = process.env.DMS_CONTAINER || 'docker-mailserver';
@@ -114,4 +115,24 @@ async function updatePassword(email, password) {
   await execInContainer(['setup', 'email', 'update', email, password]);
 }
 
-module.exports = { listAccounts, addAccount, deleteAccount, updatePassword, getContainerStatus };
+async function getBackupStream() {
+  const container = docker.getContainer(CONTAINER_NAME);
+  const exec = await container.exec({
+    Cmd: ['tar', 'czf', '-', '/var/mail', '/tmp/docker-mailserver'],
+    AttachStdout: true,
+    AttachStderr: true,
+  });
+
+  return new Promise((resolve, reject) => {
+    exec.start({ hijack: true, stdin: false }, (err, stream) => {
+      if (err) return reject(err);
+      const pass = new PassThrough();
+      docker.modem.demuxStream(stream, pass, process.stderr);
+      stream.on('end', () => pass.end());
+      stream.on('error', reject);
+      resolve(pass);
+    });
+  });
+}
+
+module.exports = { listAccounts, addAccount, deleteAccount, updatePassword, getContainerStatus, getBackupStream };
