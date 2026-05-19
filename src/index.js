@@ -1,5 +1,6 @@
 const express = require('express');
 const basicAuth = require('express-basic-auth');
+const { rateLimit } = require('express-rate-limit');
 const path = require('path');
 const dms = require('./docker');
 
@@ -19,6 +20,16 @@ function serverError(res, err) {
   console.error('[error]', err.message);
   res.status(500).json({ error: 'Interner Serverfehler' });
 }
+
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Zu viele Anfragen, bitte warte eine Minute.' },
+  })
+);
 
 app.use(
   basicAuth({
