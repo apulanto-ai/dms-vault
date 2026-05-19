@@ -42,19 +42,47 @@ function stripAnsi(str) {
   return str.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
 }
 
-async function listAccounts() {
-  const output = await execInContainer(['setup', 'email', 'list']);
-  if (!output) return [];
+function parseDiskSizes(duOutput) {
+  const sizes = {};
+  for (const line of duOutput.split('\n')) {
+    const [kb, path] = line.split('\t');
+    if (!path) continue;
+    const parts = path.trim().split('/');
+    const user = parts[parts.length - 1];
+    const domain = parts[parts.length - 2];
+    if (user && domain) sizes[`${user}@${domain}`] = parseInt(kb, 10);
+  }
+  return sizes;
+}
 
-  return stripAnsi(output)
+function formatKb(kb) {
+  if (kb >= 1024 * 1024) return (kb / (1024 * 1024)).toFixed(1) + ' GB';
+  if (kb >= 1024) return (kb / 1024).toFixed(1) + ' MB';
+  return kb + ' KB';
+}
+
+async function listAccounts() {
+  const [listOutput, duOutput] = await Promise.all([
+    execInContainer(['setup', 'email', 'list']),
+    execInContainer(['sh', '-c', 'du -sk /var/mail/*/*']).catch(() => ''),
+  ]);
+
+  if (!listOutput) return [];
+
+  const diskSizes = parseDiskSizes(duOutput);
+
+  return stripAnsi(listOutput)
     .split('\n')
     .map((line) => {
       const m = line.match(/\*\s*(\S+@\S+)\s+\(\s*(\S+)\s*\/\s*(\S+)\s*\)\s*\[(\d+)%\]/);
-      if (m) return { email: m[1], used: m[2], limit: m[3], pct: parseInt(m[4], 10) };
-      // fallback: line without quota info
-      const token = line.replace(/^\*\s*/, '').trim().split(/\s+/)[0];
-      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(token)) return { email: token, used: '0', limit: '~', pct: 0 };
-      return null;
+      const email = m ? m[1] : line.replace(/^\*\s*/, '').trim().split(/\s+/)[0];
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+
+      const diskKb = diskSizes[email] ?? null;
+      const diskLabel = diskKb !== null ? formatKb(diskKb) : null;
+
+      if (m) return { email, used: m[2], limit: m[3], pct: parseInt(m[4], 10), diskLabel };
+      return { email, used: '0', limit: '~', pct: 0, diskLabel };
     })
     .filter(Boolean);
 }
