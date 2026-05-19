@@ -4,6 +4,8 @@ A simple web interface for managing email accounts in [Docker Mailserver](https:
 
 ![screenshot](https://img.shields.io/badge/node-20-green) ![license](https://img.shields.io/badge/license-MIT-blue)
 
+![DMS WebUI Screenshot](docs/screenshot.png)
+
 > **Disclaimer:** This project was built with a Vibe Coding approach — iterative, AI-assisted development without formal auditing or test coverage. It is intended for **personal/homelab use only** and is **not suitable for public-facing or production deployments**. Use at your own risk.
 
 ## Features
