@@ -275,9 +275,22 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    select {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    select option { background: var(--surface); color: var(--text); }
   </style>
 </head>
-<body x-data="app()" x-init="load()">
+<body x-data="app()">
 
   <header>
     <h1><span class="icon">✉</span> Docker Mailserver Admin</h1>
@@ -290,6 +303,14 @@
                 x-text="containerStatus.running ? 'Läuft seit ' + uptime() : 'Gestoppt'"></span>
         </span>
       </template>
+      <select @change="setRefresh(parseInt($event.target.value))" :value="refreshInterval"
+              title="Auto-Refresh">
+        <option value="0">Kein Refresh</option>
+        <option value="10">10 s</option>
+        <option value="30">30 s</option>
+        <option value="60">1 min</option>
+        <option value="300">5 min</option>
+      </select>
       <button class="btn btn-ghost" @click="toggleTheme()"
               style="padding:0.35rem 0.6rem;font-size:0.85rem;"
               :title="theme === 'dark' ? 'Helles Design' : 'Dunkles Design'"
@@ -447,8 +468,28 @@
         container: '',
         containerStatus: null,
         theme: localStorage.getItem('theme') || 'dark',
+        refreshInterval: parseInt(localStorage.getItem('refreshInterval') || '0', 10),
+        _refreshTimer: null,
         form: { email: '', password: '' },
         toasts: [],
+
+        init() {
+          this.applyRefresh();
+          this.load();
+        },
+
+        setRefresh(seconds) {
+          this.refreshInterval = seconds;
+          localStorage.setItem('refreshInterval', seconds);
+          this.applyRefresh();
+        },
+
+        applyRefresh() {
+          if (this._refreshTimer) clearInterval(this._refreshTimer);
+          if (this.refreshInterval > 0) {
+            this._refreshTimer = setInterval(() => this.load(), this.refreshInterval * 1000);
+          }
+        },
 
         async load() {
           this.loading = true;
