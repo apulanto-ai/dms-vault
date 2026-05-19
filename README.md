@@ -4,12 +4,15 @@ A simple web interface for managing email accounts in [Docker Mailserver](https:
 
 ![screenshot](https://img.shields.io/badge/node-20-green) ![license](https://img.shields.io/badge/license-MIT-blue)
 
+> **Disclaimer:** This project was built with a Vibe Coding approach — iterative, AI-assisted development without formal auditing or test coverage. It is intended for **personal/homelab use only** and is **not suitable for public-facing or production deployments**. Use at your own risk.
+
 ## Features
 
-- List all email accounts
+- List all email accounts with quota usage
 - Create new accounts
 - Change passwords
 - Delete accounts
+- Container status display (running state + uptime)
 - Protected by HTTP Basic Auth
 
 ## Requirements
@@ -72,6 +75,33 @@ The web interface is available at `http://<your-host>:8181`.
 - All API inputs are validated before being passed to DMS.
 - Commands are passed as argument arrays (no shell interpolation), preventing command injection.
 - It is recommended to run this on a private network only and not expose it to the internet.
+
+## Changelog
+
+### v0.4.0
+- Quota display per account (usage / limit with progress bar)
+- Container status indicator in header (running state + uptime)
+- New `/api/status` endpoint via Docker inspect
+
+### v0.3.2
+- Dynamic Docker socket GID detection at container startup via entrypoint script
+- Fixes permission errors across hosts with different socket GIDs (e.g. Unraid GID 281)
+
+### v0.3.1
+- Run container as non-root user (`node`) for reduced attack surface
+
+### v0.3.0
+- Rate limiting (20 req/min) against brute-force on Basic Auth
+- Alpine.js bundled locally — no CDN dependency
+
+### v0.2.0
+- Input validation on all mutating routes (email format, password length)
+- Internal error messages no longer leaked to the client
+- Docker socket mounted read-only
+
+### v0.1.0
+- Initial release: list, create, delete accounts, change passwords
+- HTTP Basic Auth, Docker socket exec via dockerode
 
 ## License
 
