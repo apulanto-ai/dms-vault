@@ -48,8 +48,30 @@ async function listAccounts() {
 
   return stripAnsi(output)
     .split('\n')
-    .map((line) => line.replace(/^\*\s*/, '').trim().split(/\s+/)[0])
-    .filter((token) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(token));
+    .map((line) => {
+      const m = line.match(/\*\s*(\S+@\S+)\s+\(\s*(\S+)\s*\/\s*(\S+)\s*\)\s*\[(\d+)%\]/);
+      if (m) return { email: m[1], used: m[2], limit: m[3], pct: parseInt(m[4], 10) };
+      // fallback: line without quota info
+      const token = line.replace(/^\*\s*/, '').trim().split(/\s+/)[0];
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(token)) return { email: token, used: '0', limit: '~', pct: 0 };
+      return null;
+    })
+    .filter(Boolean);
+}
+
+async function getContainerStatus() {
+  try {
+    const container = docker.getContainer(CONTAINER_NAME);
+    const info = await container.inspect();
+    return {
+      name: CONTAINER_NAME,
+      running: info.State.Running,
+      status: info.State.Status,
+      startedAt: info.State.Running ? info.State.StartedAt : null,
+    };
+  } catch {
+    return { name: CONTAINER_NAME, running: false, status: 'not found', startedAt: null };
+  }
 }
 
 async function addAccount(email, password) {
@@ -64,4 +86,4 @@ async function updatePassword(email, password) {
   await execInContainer(['setup', 'email', 'update', email, password]);
 }
 
-module.exports = { listAccounts, addAccount, deleteAccount, updatePassword };
+module.exports = { listAccounts, addAccount, deleteAccount, updatePassword, getContainerStatus };

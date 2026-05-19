@@ -250,7 +250,16 @@
 
   <header>
     <h1><span class="icon">✉</span> Docker Mailserver Admin</h1>
-    <span style="font-size:0.8rem;color:#475569;" x-text="'Container: ' + container"></span>
+    <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.8rem;">
+      <span style="color:#475569;" x-text="'Container: ' + container"></span>
+      <template x-if="containerStatus">
+        <span style="display:flex;align-items:center;gap:0.35rem;">
+          <span :style="'width:0.55rem;height:0.55rem;border-radius:50%;background:' + (containerStatus.running ? '#22c55e' : '#ef4444')"></span>
+          <span :style="'color:' + (containerStatus.running ? '#86efac' : '#fca5a5')"
+                x-text="containerStatus.running ? 'Läuft seit ' + uptime() : 'Gestoppt'"></span>
+        </span>
+      </template>
+    </div>
   </header>
 
   <div class="container">
@@ -279,22 +288,36 @@
           <thead>
             <tr>
               <th>E-Mail-Adresse</th>
+              <th>Quota</th>
               <th style="text-align:right">Aktionen</th>
             </tr>
           </thead>
           <tbody>
-            <template x-for="email in accounts" :key="email">
+            <template x-for="account in accounts" :key="account.email">
               <tr>
                 <td>
                   <div class="email-cell">
-                    <div class="avatar" x-text="email[0].toUpperCase()"></div>
-                    <span x-text="email"></span>
+                    <div class="avatar" x-text="account.email[0].toUpperCase()"></div>
+                    <span x-text="account.email"></span>
                   </div>
+                </td>
+                <td style="font-size:0.8rem;color:#94a3b8;">
+                  <template x-if="account.limit === '~'">
+                    <span>—</span>
+                  </template>
+                  <template x-if="account.limit !== '~'">
+                    <div>
+                      <div x-text="account.used + ' / ' + account.limit + ' MB (' + account.pct + '%)'"></div>
+                      <div style="margin-top:0.25rem;height:4px;background:#334155;border-radius:2px;overflow:hidden;">
+                        <div :style="'height:100%;border-radius:2px;background:' + (account.pct > 85 ? '#ef4444' : account.pct > 60 ? '#f59e0b' : '#3b82f6') + ';width:' + account.pct + '%'"></div>
+                      </div>
+                    </div>
+                  </template>
                 </td>
                 <td>
                   <div class="actions">
-                    <button class="btn btn-ghost" @click="openPassword(email)">🔑 Passwort</button>
-                    <button class="btn btn-danger" @click="confirmDelete(email)">🗑</button>
+                    <button class="btn btn-ghost" @click="openPassword(account.email)">🔑 Passwort</button>
+                    <button class="btn btn-danger" @click="confirmDelete(account.email)">🗑</button>
                   </div>
                 </td>
               </tr>
@@ -378,6 +401,7 @@
         saving: false,
         modal: null,
         container: '',
+        containerStatus: null,
         form: { email: '', password: '' },
         toasts: [],
 
@@ -387,8 +411,12 @@
             const r = await fetch('/api/accounts');
             if (!r.ok) throw new Error((await r.json()).error);
             this.accounts = await r.json();
-            const meta = await fetch('/api/meta').catch(() => null);
+            const [meta, status] = await Promise.all([
+              fetch('/api/meta').catch(() => null),
+              fetch('/api/status').catch(() => null),
+            ]);
             if (meta && meta.ok) this.container = (await meta.json()).container;
+            if (status && status.ok) this.containerStatus = await status.json();
           } catch (e) {
             this.toast('error', 'Fehler: ' + e.message);
           } finally {
@@ -466,6 +494,16 @@
           } finally {
             this.saving = false;
           }
+        },
+
+        uptime() {
+          if (!this.containerStatus?.startedAt) return '';
+          const ms = Date.now() - new Date(this.containerStatus.startedAt).getTime();
+          const h = Math.floor(ms / 3600000);
+          const m = Math.floor((ms % 3600000) / 60000);
+          if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
+          if (h > 0) return `${h}h ${m}m`;
+          return `${m}m`;
         },
 
         toast(type, msg) {

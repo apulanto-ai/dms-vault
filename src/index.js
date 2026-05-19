@@ -46,6 +46,14 @@ app.get('/api/meta', (req, res) => {
   res.json({ container: process.env.DMS_CONTAINER || 'docker-mailserver' });
 });
 
+app.get('/api/status', async (req, res) => {
+  try {
+    res.json(await dms.getContainerStatus());
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
 app.get('/api/accounts', async (req, res) => {
   try {
     res.json(await dms.listAccounts());
