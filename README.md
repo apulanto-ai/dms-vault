@@ -15,8 +15,9 @@ A simple web interface for managing email accounts in [Docker Mailserver](https:
 - Change passwords
 - Delete accounts
 - Total storage summary across all mailboxes
-- One-click full backup download (mails + config as `.tar.gz`)
+- **One-click full backup** — downloads all mails + config as `dms-backup-YYYY-MM-DD.tar.gz` (standard Maildir format, importable into Thunderbird, Dovecot, Evolution and others)
 - Container status display (running state + uptime)
+- Configurable auto-refresh + manual refresh button
 - Dark/Light mode toggle (saved in browser)
 - Protected by HTTP Basic Auth
 
